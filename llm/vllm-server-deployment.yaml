@@ -23,12 +23,14 @@ spec:
             - "4096"
             - --allow-credentials
             - --allowed-origins
-            - '["http://frontend-deployment-trainee-playground-8.apps.medone-1.med.one"]'
+            - '["http://frontend-trainee-playground-8.apps.medone-1.med.one", "http://localhost:5173"]'
           env:
             - name: VLLM_LOGGING_LEVEL
               value: DEBUG
             - name: VLLM_TARGET_DEVICE
               value: cpu
+            - name: VLLM_CPU_KVCACHE_SPACE
+              value: "15"         
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -57,7 +59,7 @@ spec:
             httpGet:
               path: /health
               port: 8000
-            initialDelaySeconds: 150
+            initialDelaySeconds: 120
             periodSeconds: 30
             failureThreshold: 6
       volumes:
