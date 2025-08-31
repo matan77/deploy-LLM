@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: vllm-server-svc
+  namespace: trainee-playground-8
+  annotations:
+    haproxy.router.openshift.io/timeout: 10m
+    openshift.io/host.generated: 'true'
+spec:
+  host: vllm-server-svc-trainee-playground-8.apps.medone-1.med.one
+  to:
+    kind: Service
+    name: vllm-server-svc
+    weight: 100
+  port:
+    targetPort: http-vllm-server
+  wildcardPolicy: None
