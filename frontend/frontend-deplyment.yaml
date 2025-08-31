@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: matan77/frontend:1.0
-        imagePullPolicy: IfNotPresent
+        image: matan77/frontend:2.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 80 
         resources:
