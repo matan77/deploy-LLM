@@ -1,0 +1,12 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: frontend-route
+spec:
+  to:
+    kind: Service
+    name: frontend-svc
+    weight: 100
+  port:
+    targetPort: frontend-svc
+  wildcardPolicy: None
