@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: frontend-route
+  name: frontend
 spec:
   to:
     kind: Service

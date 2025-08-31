@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: vllm-server-route
+  name: vllm-server
   annotations:
     haproxy.router.openshift.io/timeout: 10m
     openshift.io/host.generated: 'true'
