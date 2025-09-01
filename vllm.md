@@ -36,3 +36,36 @@ A type of high-speed memory specifically designed for GPUs. GDDR provides the ba
 
 ### Sharding
 A database or computing concept where data or tasks are split into smaller pieces called "shards" that are distributed across multiple machines or processes. It helps improve scalability and performance by parallelizing workloads.
+
+# vLLM
+
+- **🚀 Optimized**: Nearly fully optimized, with no further work currently planned.
+- **🟢 Functional**: Fully operational, with ongoing optimizations.
+- **🟡 Planned**: Scheduled for future implementation (some may have open PRs/RFCs).
+
+### Hardware
+
+| Hardware   | Status                                        |
+|------------|-----------------------------------------------|
+| **NVIDIA** | <nobr>🚀</nobr>                               |
+| **AMD**    | <nobr>🟢</nobr>                               |
+| **INTEL GPU**    | <nobr>🟢</nobr>                         |
+| **TPU**    | <nobr>🟢</nobr>                               |
+| **CPU**    | <nobr>🟢 (x86\_64/aarch64) 🟡 (MacOS) </nobr> |
+
+
+### Models
+
+| Model Type                  | Status                                                                             |
+|-----------------------------|------------------------------------------------------------------------------------|
+| **Decoder-only Models**     | <nobr>🚀 Optimized</nobr>                                                          |
+| **Encoder-Decoder Models**  | <nobr>🟠 Delayed</nobr>                                                            |
+| **Embedding Models**        | <nobr>🟢 Functional</nobr>                                                         |
+| **Mamba Models**            | <nobr>🟢 (Mamba-2), 🟢 (Mamba-1)</nobr>                                            |
+| **Multimodal Models**       | <nobr>🟢 Functional</nobr>                                                         |
+
+Why I chose the model:
+- meta is familiar company and the llama famliy are very popular models
+- vLLM is optimized with decoder only models 
+- Context Window of 8,192 tokens
+
