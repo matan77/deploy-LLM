@@ -8,7 +8,7 @@ Link - https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct
 - Optimized for **chat and assistant-style interactions**, with strong reasoning and coding abilities.
 
 - Trained on **~15 trillion tokens** of publicly available data and fine-tuned using **supervised fine-tuning (SFT)** and **reinforcement learning from human feedback (RLHF)**.
-- Input: **text only** → Output: **text/code**.
+- Input: **text only** → Output: **text/code**. (no visioning)
 
 ---
 - Built on an **autoregressive, decoder-only transformer** with **Grouped-Query Attention (GQA)** for faster inference.
