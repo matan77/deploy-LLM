@@ -64,8 +64,22 @@ A database or computing concept where data or tasks are split into smaller piece
 | **Mamba Models**            | <nobr>🟢 (Mamba-2), 🟢 (Mamba-1)</nobr>                                            |
 | **Multimodal Models**       | <nobr>🟢 Functional</nobr>                                                         |
 
+
+### Meta-Llama-3-8B-Instruct is part of Meta’s Llama 3 model family, an 8-billion parameter instruction-tuned model.
 Why I chose the model:
 - meta is familiar company and the llama famliy are very popular models
-- vLLM is optimized with decoder only models 
+- vLLM is optimized with decoder only models (It’s suitable for tasks like text generation, where you're feeding in a prompt and asking the model to continue it)
 - Context Window of 8,192 tokens
+- Trained on ~15 trillion tokens of publicly available data
+
+
+<img width="915" height="702" alt="image" src="https://github.com/user-attachments/assets/09bac9e2-2e94-41f5-9028-f94fe641bb1b" />
+
+
+
+```
+[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [default_loader.py:267] Loading weights took 8.05 seconds
+[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [kv_cache_utils.py:849] GPU KV cache size: 122,880 tokens
+[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [kv_cache_utils.py:853] Maximum concurrency for 4,096 tokens per request: 30.00x
+```
 
