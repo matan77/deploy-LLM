@@ -79,19 +79,21 @@ The model is saved Git (lfs) Large File Storage (LFS) a Git extension designed t
 
 
 ## KV cache
-KV cache stores intermediate key (K) and value (V) computations for reuse during inference (after training), which results in a significant  speed-up when generating text. 
+KV cache stores intermediate key (K) and value (V) computations for reuse during inference (after training) at each layer, which results in a significant  speed-up when generating text. 
 The downside of a KV cache is that it adds more complexity to the code, increases memory requirements, and can't be used during training. 
 However, the inference speed-ups are often well worth the in code complexity and memory when using LLMs in production.
 
 
 
 
+
 <img width="768" height="760" alt="4249e23e-7945-4c8f-a11f-2fd921ff0672_768x760" src="https://github.com/user-attachments/assets/380852fc-9e14-4607-9b6b-bf51cdb2519f" />
 
-With KV cache
+**With KV cache**
 the value is vecoter that computed with the weights of the model
 <img width="841" height="926" alt="image" src="https://github.com/user-attachments/assets/56cd8c81-357c-48ed-925a-b1d878d2c690" />
 
+VLLM_CPU_KVCACHE_SPACE = 15
 ```
 [1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [default_loader.py:267] Loading weights took 8.05 seconds
 [1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [kv_cache_utils.py:849] GPU KV cache size: 122,880 tokens
@@ -111,9 +113,50 @@ for prompt for exmaple like `Ignore your previous instructions.` `[{'label': 'JA
 
 
 
+Due to the auto-regressive nature of the transformer , there are times when KV cache space is insufficient to handle all batched requests. In such cases, vLLM can prevent requests to free up KV cache space for other requests. Preempted requests are recomputed when sufficient KV cache space becomes available again. When this occurs, you may see the following warning
+
+
 ```
-[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [default_loader.py:267] Loading weights took 8.05 seconds
-[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [kv_cache_utils.py:849] GPU KV cache size: 122,880 tokens
-[1;36m(EngineCore_0 pid=260) [0;0m INFO 09-01 12:21:24 [kv_cache_utils.py:853] Maximum concurrency for 4,096 tokens per request: 30.00x
+WARNING 05-09 00:49:33 scheduler.py:1057 Sequence group 0 is preempted by PreemptionMode.RECOMPUTE mode because there is not enough KV cache space. This can affect the end-to-end performance. Increase gpu_memory_utilization or tensor_parallel_size to provide more KV cache memory. total_cumulative_preemption_cnt=1
 ```
+
+While this mechanism ensures system robustness, preemption and recomputation can adversely affect end-to-end latency. 
+
+| **Flag**             | **Purpose / Effect**                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gpu_memory_utilization`      | Increases the percentage of GPU memory pre-allocated for the KV cache. Higher value = more KV cache space, but less room for other uses.                        |
+| `max_num_seqs`                | Reduces the number of concurrent sequences (requests) in a batch. Lower value = less KV cache needed per batch.                                                            |
+| `max_num_batched_tokens`      | Reduces the total number of tokens in a batch. Lower value = less memory needed for KV cache.                                                                   |
+| `tensor_parallel_size`        | Shards model weights across multiple GPUs. Frees up per-GPU memory for KV cache, but may introduce synchronization overhead.                                    |
+| `pipeline_parallel_size`      | Distributes model layers across GPUs. Reduces model weight memory footprint per GPU, indirectly increasing available memory for KV cache. May increase latency. |
+
+## Tensor parallelism (more complex)
+shards model parameters across multiple GPUs within each model layer. This is the most common strategy for large model inference within a single node.
+### when to use: 
+- When the model is too large to fit on a single GPU
+- When you need to reduce memory pressure per GPU to allow more KV cache space for higher throughput
+
+
+> ⚠️ If the model fits within a single node but the GPU count doesn't evenly divide the model size, enable pipeline parallelism, which splits the model along layers and supports uneven splits. In this scenario, set tensor_parallel_size=1 and pipeline_parallel_size to the number of GPUs. Furthermore, if the GPUs on the node do not have NVLINK interconnect, leverage pipeline parallelism instead of tensor parallelism for higher throughput and lower communication overhead.
+
+NVLink is a high-speed interconnect technology developed by NVIDIA to improve data transfer between graphics processing units (GPUs) and CPUs. The technology provides a faster path with lower latency than PCI Express (PCIe), and enables the creation of unified memory across multiple GPUs. This improves performance in data-intensive computing environments such as artificial intelligence, deep learning, and scientific simulations, allowing GPUs to work together as one.
+
+## Pipeline parallelism 
+distributes model layers across multiple GPUs. Each GPU processes different parts of the model in sequence.
+### When to use:
+- When you've already maxed out efficient tensor parallelism but need to distribute the model further, or across nodes
+- For very deep and narrow models where layer distribution is more efficient than tensor sharding
+
+<img width="1208" height="666" alt="image" src="https://github.com/user-attachments/assets/b990bef9-a788-45e4-aff3-64de8bd7228f" />
+
+<img width="1496" height="740" alt="image" src="https://github.com/user-attachments/assets/b29094b3-bd14-4249-b3ad-bb1b5ed3840b" />
+
+
+## Multi-node deployment
+Ray is a distributed computing framework for scaling Python programs. Multi-node vLLM deployments require Ray as the runtime engine.
+vLLM uses Ray to manage the distributed execution of tasks across multiple nodes and control where execution happens.
+These APIs add production-grade fault tolerance (סובלנות לתקלות), scaling, and distributed observability to vLLM workloads.
+
+When you deploy vLLM in a multi-node setup, the pods form a distributed cluster using PyTorch Distributed with NCCL for GPU-to-GPU communication. Within this cluster, one pod is designated as rank 0 (the master). This master pod is the only one that runs the HTTP API server and accepts client requests. All other pods act as workers—they don’t expose an API but instead participate in distributed inference by executing computations and sharing data with the master over NCCL (NVIDIA Collective Communications Library).
+
 
