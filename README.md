@@ -1,7 +1,7 @@
 # Deploy Meta-Llama-3-8B-Instruct
 
 ---
-
+Link - https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct
 ## 📌 Overview
 
 - **Meta-Llama-3-8B-Instruct** is part of Meta’s Llama 3 model family, an **8-billion parameter instruction-tuned model**.

@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      containers:
+        - name: vllm-server
+          image: matan77/vllm-cpu:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - --model
+            - /models/Llama-3-8B-Instruct
+            - --max-model-len
+            - "4096"
+            - --allow-credentials
+            - --allowed-origins
+            - '["http://frontend-trainee-playground-8.apps.medone-1.med.one", "http://localhost:5173"]'
+          env:
+            - name: VLLM_LOGGING_LEVEL
+              value: DEBUG
+            - name: VLLM_TARGET_DEVICE
+              value: cpu
+            - name: VLLM_CPU_KVCACHE_SPACE
+              value: "15"         
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: llama-storage
+              mountPath: /models/
+          resources:
+            requests:
+              cpu: '20'
+              memory: 35Gi
+            limits:
+              cpu: '80'
+              memory: 35Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySe  conds: 60
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 6
+      volumes:
+        - name: llama-storage
+          persistentVolumeClaim:
+            claimName: vllm-models
+  strategy:
+      type: Recreate

@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend-svc
+  labels:
+    app: frontend
+spec:
+  ports:
+    - name: frontend-svc
+      protocol: TCP
+      port: 7000
+      targetPort: 7000
+  sessionAffinity: None
+  type: ClusterIP
+  selector:
+    app: frontend
